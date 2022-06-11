@@ -37,10 +37,13 @@ async function handleRequest(request: Request) {
       });
 
       if (newCorsNeeded(optResponse)) {
+        console.log("Proxy to %s", url);
         const response = await fetch(url, request);
 
         return new Response(response.body, { ...response, headers: corsHeaders(response) });
       }
+
+      console.log("CORS already in order. Redirect to %s", url);
 
       return new Response(null, {
         status: 302,
