@@ -7,7 +7,7 @@ function corsHeaders(response?: Response) {
 }
 
 function newCorsNeeded (response: Response) {
-  return !response.headers.has(ACAO) || response.headers.get(ACAO) !== '*';
+  return !response.headers.has("access-control-allow-origin") || response.headers.get("access-control-allow-origin") !== '*';
 }
 
 function isUrl(url: string) {
@@ -36,14 +36,14 @@ async function handleRequest(request: Request) {
 
       if (newCorsNeeded(response)) {
         return new Response(response.body, { ...response, headers: corsHeaders(response) });
-      } else {
-        return new Response(null, {
-          status: 302,
-          headers: new Headers({
-            'Location': url
-          })
-        });
       }
+
+      return new Response(null, {
+        status: 302,
+        headers: new Headers({
+          'Location': url
+        })
+      });
   }
 
   const usage = new URL("README.md", import.meta.url);
