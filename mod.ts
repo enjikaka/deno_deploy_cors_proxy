@@ -32,9 +32,13 @@ async function handleRequest(request: Request) {
         return new Response(null, { headers: corsHeaders() });
       }
 
-      const response = await fetch(url, request);
+      const response = await fetch(url, {
+        method: 'OPTIONS'
+      });
 
       if (newCorsNeeded(response)) {
+        const response = await fetch(url, request);
+
         return new Response(response.body, { ...response, headers: corsHeaders(response) });
       }
 
