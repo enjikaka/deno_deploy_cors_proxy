@@ -1,12 +1,13 @@
-function addCorsIfNeeded(response: Response) {
-  const headers = new Headers(response.headers);
-  const ACAO = "access-control-allow-origin";
-
-  if (!headers.has(ACAO) || headers.get(ACAO) !== '*') {
-    headers.set(ACAO, "https://podd.app");
-  }
+function corsHeaders(response?: Response) {
+  const headers = new Headers(response ? response.headers : {});
+  
+  headers.set("access-control-allow-origin", "https://podd.app");
 
   return headers;
+}
+
+function newCorsNeeded (response: Response) {
+  return !response.headers.has(ACAO) || response.headers.get(ACAO) !== '*';
 }
 
 function isUrl(url: string) {
@@ -27,15 +28,22 @@ async function handleRequest(request: Request) {
   const url = pathname.substr(1);
 
   if (isUrl(url)) {
-    console.log("proxy to %s", url);
-    const corsHeaders = addCorsIfNeeded(new Response());
-    if (request.method.toUpperCase() === "OPTIONS") {
-      return new Response(null, { headers: corsHeaders });
-    }
+      if (request.method.toUpperCase() === "OPTIONS") {
+        return new Response(null, { headers: corsHeaders() });
+      }
 
-    const response = await fetch(url, request);
-    const headers = addCorsIfNeeded(response);
-    return new Response(response.body, { ...response, headers });
+      const response = await fetch(url, request);
+
+      if (newCorsNeeded(response)) {
+        return new Response(response.body, { ...response, headers: corsHeaders(response) });
+      } else {
+        return new Response(null, {
+          status: 302,
+          headers: new Headers({
+            'Location': url
+          })
+        });
+      }
   }
 
   const usage = new URL("README.md", import.meta.url);
