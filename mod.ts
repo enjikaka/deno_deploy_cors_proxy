@@ -1,8 +1,9 @@
 function addCorsIfNeeded(response: Response) {
   const headers = new Headers(response.headers);
+  const ACAO = "access-control-allow-origin";
 
-  if (!headers.has("access-control-allow-origin")) {
-    headers.set("access-control-allow-origin", "*");
+  if (!headers.has(ACAO) || headers.get(ACAO) !== '*') {
+    headers.set(ACAO, "https://podd.app");
   }
 
   return headers;
