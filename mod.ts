@@ -49,22 +49,11 @@ async function handler (request: Request) {
         return new Response(null, { headers: corsHeaders() });
       }
 
-      /*
-        Make an OPTIONS request to the target URL to
-        assert if we need to set CORS headers or not.
-        (Optimization to use as little data on Deno Deploy as possible)
-      */
-      const optResponse = await fetch(url, {
-        method: 'OPTIONS'
-      });
+      const response = await fetch(url, request);
 
-      if (newCorsNeeded(optResponse)) {
+      if (newCorsNeeded(response)) {
         console.log("Proxy to %s", url);
-        const response = await fetch(url, request);
-
-        if (newCorsNeeded(response)) {
-          return new Response(response.body, { ...response, headers: corsHeaders(response) });
-        }
+        return new Response(response.body, { ...response, headers: corsHeaders(response) });
       }
 
       console.log("CORS already in order. Redirect to %s", url);
