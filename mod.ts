@@ -1,5 +1,7 @@
 import { serve } from "https://deno.land/std@0.143.0/http/server.ts";
 
+let origin;
+
 /**
  * Generates Headers with Access-Control-Allow-Origin.
  * If a response is passed in, the headers are cloned
@@ -7,8 +9,14 @@ import { serve } from "https://deno.land/std@0.143.0/http/server.ts";
  */
 function corsHeaders(response?: Response): Headers {
   const headers = new Headers(response ? response.headers : {});
+  const allowedOrigins = [
+    'https://podd.app',
+    'https://enjikaka-podd-app.deno.dev/'
+  ]
   
-  headers.set("access-control-allow-origin", "https://podd.app");
+  if (allowedOrigins.includes(origin)) {
+    headers.set("access-control-allow-origin", origin);
+  }
 
   return headers;
 }
@@ -33,6 +41,7 @@ function isUrl(url: string) {
 async function handler (request: Request) {
   const { pathname } = new URL(request.url);
   const url = pathname.substr(1);
+  origin = request.headers.get('origin');
 
   if (isUrl(url)) {
       // Respond to OPTIONS requests to this proxy service
