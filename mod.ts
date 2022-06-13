@@ -1,4 +1,11 @@
-function corsHeaders(response?: Response) {
+import { serve } from "https://deno.land/std@0.143.0/http/server.ts";
+
+/**
+ * Generates Headers with Access-Control-Allow-Origin.
+ * If a response is passed in, the headers are cloned
+ * and the CORS header set before the Headers are returned.
+ */
+function corsHeaders(response?: Response): Headers {
   const headers = new Headers(response ? response.headers : {});
   
   headers.set("access-control-allow-origin", "https://podd.app");
@@ -23,15 +30,21 @@ function isUrl(url: string) {
   }
 }
 
-async function handleRequest(request: Request) {
+async function handler (request: Request) {
   const { pathname } = new URL(request.url);
   const url = pathname.substr(1);
 
   if (isUrl(url)) {
+      // Respond to OPTIONS requests to this proxy service
       if (request.method.toUpperCase() === "OPTIONS") {
         return new Response(null, { headers: corsHeaders() });
       }
 
+      /*
+        Make an OPTIONS request to the target URL to
+        assert if we need to set CORS headers or not.
+        (Optimization to use as little data on Deno Deploy as possible)
+      */
       const optResponse = await fetch(url, {
         method: 'OPTIONS'
       });
@@ -40,7 +53,9 @@ async function handleRequest(request: Request) {
         console.log("Proxy to %s", url);
         const response = await fetch(url, request);
 
-        return new Response(response.body, { ...response, headers: corsHeaders(response) });
+        if (newCorsNeeded(response)) {
+          return new Response(response.body, { ...response, headers: corsHeaders(response) });
+        }
       }
 
       console.log("CORS already in order. Redirect to %s", url);
@@ -57,6 +72,4 @@ async function handleRequest(request: Request) {
   return fetch(usage);
 }
 
-addEventListener("fetch", (event: FetchEvent) => {
-  event.respondWith(handleRequest(event.request));
-});
+await serve(handler);
