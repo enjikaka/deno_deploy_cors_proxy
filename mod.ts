@@ -11,7 +11,8 @@ function corsHeaders(response?: Response): Headers {
   const headers = new Headers(response ? response.headers : {});
   const allowedOrigins = [
     'https://podd.app',
-    'https://enjikaka-podd-app.deno.dev'
+    'https://enjikaka-podd-app.deno.dev',
+    'https://rss-reader.app/'
   ]
   
   if (allowedOrigins.includes(origin)) {
