@@ -12,7 +12,7 @@ function corsHeaders(response?: Response): Headers {
   const allowedOrigins = [
     'https://podd.app',
     'https://enjikaka-podd-app.deno.dev',
-    'https://rss-reader.app/'
+    'https://rss-reader.app'
   ]
   
   if (allowedOrigins.includes(origin)) {
