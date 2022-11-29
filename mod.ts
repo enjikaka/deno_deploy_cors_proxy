@@ -13,7 +13,7 @@ function corsHeaders(response?: Response): Headers {
     'https://podd.app',
     'https://enjikaka-podd-app.deno.dev',
     'https://rss-reader.app',
-    'https://light-fox-51.deno.dev'
+    'https://no-db-podcast-rss-example.deno.dev'
   ]
 
   if (allowedOrigins.includes(origin)) {
